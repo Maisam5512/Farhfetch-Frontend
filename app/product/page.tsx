@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import type { Product } from "@/types/product"
 import ProductCard from "@/components/Product-card"
 
-// Lightweight skeleton component
+
 function ProductCardSkeleton() {
   return (
     <div className="animate-pulse">
@@ -16,7 +16,7 @@ function ProductCardSkeleton() {
   )
 }
 
-// Server component for data fetching
+
 async function ProductList() {
   let products: Product[] = []
   let error: string | null = null

@@ -15,7 +15,6 @@ interface ImageGalleryProps {
   images: GalleryImage[]
 }
 
-// Optimized shimmer with CSS animation instead of JS
 const ImageShimmer = React.memo(() => (
   <div className="absolute inset-0 bg-gray-200 overflow-hidden">
     <div
@@ -36,7 +35,7 @@ const ImageShimmer = React.memo(() => (
 
 ImageShimmer.displayName = "ImageShimmer"
 
-// Highly optimized image component
+
 const GalleryImageItem = React.memo(
   ({
     image,
@@ -52,7 +51,7 @@ const GalleryImageItem = React.memo(
     const [imageLoaded, setImageLoaded] = useState(false)
     const [imageError, setImageError] = useState(false)
 
-    // Optimized blur data URL - smaller and more efficient
+    
     const blurDataURL = useMemo(
       () =>
         "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q==",
@@ -80,10 +79,10 @@ const GalleryImageItem = React.memo(
             maxHeight: "600px",
           }}
         >
-          {/* Show shimmer only when image is not loaded and not in error state */}
+         
           {!imageLoaded && !imageError && <ImageShimmer />}
 
-          {/* Only render image if it's visible or priority */}
+          
           {(isVisible || priority) && (
             <Image
               src={image.url || "/placeholder.svg?height=600&width=450"}
@@ -116,7 +115,6 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
   const [visibleImages, setVisibleImages] = useState(2)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Optimized resize handler with debouncing
   const updateVisibleImages = useCallback(() => {
     const newVisibleImages = window.innerWidth < 640 ? 1 : 2
     if (newVisibleImages !== visibleImages) {
@@ -141,7 +139,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     }
   }, [updateVisibleImages])
 
-  // Optimized scroll function with requestAnimationFrame
+ 
   const scrollToImage = useCallback(
     (index: number) => {
       if (scrollContainerRef.current) {
@@ -160,7 +158,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     [visibleImages],
   )
 
-  // Memoized navigation handlers
+ 
   const handlePrevious = useCallback(() => {
     const newIndex = Math.max(currentImageIndex - visibleImages, 0)
     scrollToImage(newIndex)
@@ -171,7 +169,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     scrollToImage(newIndex)
   }, [currentImageIndex, visibleImages, images.length, scrollToImage])
 
-  // Memoize button visibility
+
   const buttonVisibility = useMemo(
     () => ({
       showPrevButton: currentImageIndex > 0,
@@ -180,7 +178,6 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     [currentImageIndex, images.length, visibleImages],
   )
 
-  // Memoize pagination data
   const paginationData = useMemo(() => {
     const totalSets = Math.ceil(images.length / visibleImages)
     const activeSet = Math.floor(currentImageIndex / visibleImages)
@@ -192,22 +189,22 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     }
   }, [images.length, visibleImages, currentImageIndex])
 
-  // Memoize pagination handlers
+
   const paginationHandlers = useMemo(
     () => Array.from({ length: paginationData.totalSets }, (_, i) => () => scrollToImage(i * visibleImages)),
     [paginationData.totalSets, scrollToImage, visibleImages],
   )
 
-  // Determine which images are visible for optimization
+  
   const getVisibleImageIndices = useMemo(() => {
     const start = currentImageIndex
-    const end = Math.min(start + visibleImages + 1, images.length) // Load one extra for smooth scrolling
+    const end = Math.min(start + visibleImages + 1, images.length) 
     return { start, end }
   }, [currentImageIndex, visibleImages, images.length])
 
   return (
     <div className="relative" style={{ minHeight: "500px", maxHeight: "700px" }}>
-      {/* Main scrollable container with fixed height to prevent layout shift */}
+      
       <div
         ref={scrollContainerRef}
         className="flex overflow-x-auto snap-x snap-mandatory"
@@ -226,14 +223,14 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
               key={image.id}
               image={image}
               index={index}
-              priority={index < 2} // Only first 2 images are priority
+              priority={index < 2} 
               isVisible={isVisible}
             />
           )
         })}
       </div>
 
-      {/* Navigation buttons with fixed positioning */}
+      
       {buttonVisibility.showPrevButton && (
         <button
           onClick={handlePrevious}
@@ -258,7 +255,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
         </button>
       )}
 
-      {/* Fixed pagination dots container to prevent layout shift */}
+      
       {paginationData.showPagination && (
         <div className="flex justify-center mt-4 gap-2" style={{ minHeight: "20px" }}>
           {Array.from({ length: paginationData.totalSets }).map((_, i) => (

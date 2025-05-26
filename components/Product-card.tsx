@@ -21,19 +21,18 @@ const ProductCard = memo(function ProductCard({ product, priority = false }: Pro
     return rawUrl.startsWith("http") ? rawUrl : `https://dependable-cow-a08d589b62.media.strapiapp.com${rawUrl}`
   }
 
-  // Simplified discount calculation
+  
   const discountPercentage =
     product.discountPercentage ||
     (product.discountedPrice && product.originalPrice
       ? Math.round(((product.originalPrice - product.discountedPrice) / product.originalPrice) * 100)
       : 0)
 
-  // Simplified price formatting
   const formatPrice = (price: number) => `$${price}`
   const originalPrice = formatPrice(product.originalPrice)
   const discountedPrice = product.discountedPrice > 0 ? formatPrice(product.discountedPrice) : null
 
-  // Simplified sizes string
+  
   const sizesString = product.sizes?.join(", ") || ""
 
   return (
