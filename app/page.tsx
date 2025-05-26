@@ -7,26 +7,26 @@
 
 // // Shimmer components for loading state
 // const ImageShimmer = () => (
-//   <div className="absolute inset-0 bg-gray-200 animate-pulse">
-//     <div className="w-full h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-shimmer bg-[length:200%_100%]" />
+//   <div className="absolute inset-0 bg-gray-200">
+//     <div className="w-full h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%]" />
 //   </div>
 // )
 
 // const TextShimmer = () => (
 //   <div className="space-y-6">
-//     <div className="h-12 bg-gray-200 rounded animate-pulse">
-//       <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-shimmer bg-[length:200%_100%] rounded" />
+//     <div className="h-12 bg-gray-200 rounded">
+//       <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded" />
 //     </div>
 //     <div className="space-y-3">
-//       <div className="h-4 bg-gray-200 rounded animate-pulse">
-//         <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-shimmer bg-[length:200%_100%] rounded" />
+//       <div className="h-4 bg-gray-200 rounded">
+//         <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded" />
 //       </div>
-//       <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse">
-//         <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-shimmer bg-[length:200%_100%] rounded" />
+//       <div className="h-4 bg-gray-200 rounded w-3/4">
+//         <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded" />
 //       </div>
 //     </div>
-//     <div className="h-12 bg-gray-200 rounded w-32 animate-pulse">
-//       <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-shimmer bg-[length:200%_100%] rounded" />
+//     <div className="h-12 bg-gray-200 rounded w-32">
+//       <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded" />
 //     </div>
 //   </div>
 // )
@@ -140,12 +140,17 @@
 // export default function HomePage() {
 //   const [homeData, setHomeData] = useState<HomePageItem[]>([])
 //   const [loading, setLoading] = useState(true)
+//   const [imageLoadStates, setImageLoadStates] = useState<Record<number, boolean>>({})
 //   const router = useRouter()
 
 //   useEffect(() => {
 //     const fetchData = async () => {
 //       try {
-//         const response = await fetch("https://dependable-cow-a08d589b62.strapiapp.com/api/Home-sections?populate=*")
+//         const response = await fetch("https://dependable-cow-a08d589b62.strapiapp.com/api/Home-sections?populate=*", {
+//           headers: {
+//             Accept: "application/json",
+//           },
+//         })
 
 //         if (!response.ok) {
 //           throw new Error("Failed to fetch data")
@@ -165,7 +170,7 @@
 //           image: {
 //             id: item.image.id,
 //             name: item.image.name,
-//             url: item.image.url, // Use full URL directly
+//             url: item.image.url,
 //             alternativeText: item.image.alternativeText,
 //             width: item.image.width,
 //             height: item.image.height,
@@ -198,31 +203,40 @@
 //     router.push("/product")
 //   }
 
+//   const handleImageLoad = (imageId: number) => {
+//     setImageLoadStates((prev) => ({ ...prev, [imageId]: true }))
+//   }
+
 //   if (loading) {
 //     return <HomePageSkeleton />
 //   }
 
+//   const sortedData = homeData.sort((a, b) => a.order - b.order)
+
 //   return (
 //     <div className="bg-white">
-//       {homeData
-//         .sort((a, b) => a.order - b.order)
-//         .map((item) => (
+//       {sortedData.map((item, index) => {
+//         const isFirstImage = index === 0
+//         const imageUrl = item.image.formats?.small?.url || item.image.url || "/placeholder.svg"
+//         const isImageLoaded = imageLoadStates[item.id]
+
+//         return (
 //           <section key={item.id} className="w-full">
 //             <div className="flex flex-col lg:grid lg:grid-cols-2 w-full">
 //               {item.layout === "left" ? (
 //                 <>
 //                   <div className="relative w-full aspect-[4/3]">
-//                     <ImageShimmer />
+//                     {!isImageLoaded && <ImageShimmer />}
 //                     <Image
-//                       src={item.image.url || "/placeholder.svg"}
+//                       src={imageUrl || "/placeholder.svg"}
 //                       alt={item.image.alternativeText || item.title}
 //                       fill
-//                       className="object-cover opacity-0 transition-opacity duration-300"
-//                       priority
-//                       onLoad={(e) => {
-//                         const target = e.target as HTMLImageElement
-//                         target.style.opacity = "1"
-//                       }}
+//                       className={`object-cover transition-opacity duration-300 ${isImageLoaded ? "opacity-100" : "opacity-0"}`}
+//                       priority={isFirstImage}
+//                       loading={isFirstImage ? "eager" : "lazy"}
+//                       sizes="(max-width: 768px) 100vw, 50vw"
+//                       quality={85}
+//                       onLoad={() => handleImageLoad(item.id)}
 //                     />
 //                   </div>
 //                   <div className="flex items-center justify-center p-8 lg:p-16 order-2 bg-gray-50 w-full">
@@ -249,7 +263,7 @@
 //                       <div className="flex justify-center">
 //                         <Button
 //                           onClick={handleShopNowClick}
-//                           className="bg-white text-gray-800 border border-gray-300 hover:bg-gray-100 px-8 py-3 text-base font-medium transition-colors duration-200"
+//                           className="bg-white text-gray-800 cursor-pointer border border-gray-300 hover:bg-gray-100 px-8 py-3 text-base font-medium transition-colors duration-200"
 //                         >
 //                           {item.button_text}
 //                         </Button>
@@ -257,61 +271,63 @@
 //                     </div>
 //                   </div>
 //                   <div className="relative w-full aspect-[4/3] order-1 lg:order-2">
-//                     <ImageShimmer />
+//                     {!isImageLoaded && <ImageShimmer />}
 //                     <Image
-//                       src={item.image.url || "/placeholder.svg"}
+//                       src={imageUrl || "/placeholder.svg"}
 //                       alt={item.image.alternativeText || item.title}
 //                       fill
-//                       className="object-cover opacity-0 transition-opacity duration-300"
-//                       priority
-//                       onLoad={(e) => {
-//                         const target = e.target as HTMLImageElement
-//                         target.style.opacity = "1"
-//                       }}
+//                       className={`object-cover transition-opacity duration-300 ${isImageLoaded ? "opacity-100" : "opacity-0"}`}
+//                       priority={isFirstImage}
+//                       loading={isFirstImage ? "eager" : "lazy"}
+//                       sizes="(max-width: 768px) 100vw, 50vw"
+//                       quality={85}
+//                       onLoad={() => handleImageLoad(item.id)}
 //                     />
 //                   </div>
 //                 </>
 //               )}
 //             </div>
 //           </section>
-//         ))}
+//         )
+//       })}
 //     </div>
 //   )
 // }
 
 
 
+
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, lazy, Suspense } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 
-// Shimmer components for loading state
-const ImageShimmer = () => (
-  <div className="absolute inset-0 bg-gray-200">
-    <div className="w-full h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%]" />
-  </div>
+// Lazy load shimmer components to reduce initial bundle
+const ImageShimmer = lazy(() =>
+  Promise.resolve({
+    default: () => (
+      <div className="absolute inset-0 bg-gray-200 animate-pulse">
+        <div className="w-full h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" />
+      </div>
+    ),
+  }),
 )
 
-const TextShimmer = () => (
-  <div className="space-y-6">
-    <div className="h-12 bg-gray-200 rounded">
-      <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded" />
-    </div>
-    <div className="space-y-3">
-      <div className="h-4 bg-gray-200 rounded">
-        <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded" />
+const TextShimmer = lazy(() =>
+  Promise.resolve({
+    default: () => (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-12 bg-gray-200 rounded" />
+        <div className="space-y-3">
+          <div className="h-4 bg-gray-200 rounded" />
+          <div className="h-4 bg-gray-200 rounded w-3/4" />
+        </div>
+        <div className="h-12 bg-gray-200 rounded w-32" />
       </div>
-      <div className="h-4 bg-gray-200 rounded w-3/4">
-        <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded" />
-      </div>
-    </div>
-    <div className="h-12 bg-gray-200 rounded w-32">
-      <div className="h-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] rounded" />
-    </div>
-  </div>
+    ),
+  }),
 )
 
 const HomePageSkeleton = () => (
@@ -322,11 +338,21 @@ const HomePageSkeleton = () => (
           {index % 2 === 1 ? (
             <>
               <div className="relative w-full aspect-[4/3]">
-                <ImageShimmer />
+                <Suspense fallback={<div className="absolute inset-0 bg-gray-200" />}>
+                  <ImageShimmer />
+                </Suspense>
               </div>
               <div className="flex items-center justify-center p-8 lg:p-16 order-2 bg-gray-50 w-full">
                 <div className="max-w-md w-full">
-                  <TextShimmer />
+                  <Suspense
+                    fallback={
+                      <div className="space-y-6">
+                        <div className="h-12 bg-gray-200 rounded" />
+                      </div>
+                    }
+                  >
+                    <TextShimmer />
+                  </Suspense>
                 </div>
               </div>
             </>
@@ -334,11 +360,21 @@ const HomePageSkeleton = () => (
             <>
               <div className="flex items-center justify-center p-8 lg:p-16 order-2 lg:order-1 bg-gray-50 w-full">
                 <div className="max-w-md w-full">
-                  <TextShimmer />
+                  <Suspense
+                    fallback={
+                      <div className="space-y-6">
+                        <div className="h-12 bg-gray-200 rounded" />
+                      </div>
+                    }
+                  >
+                    <TextShimmer />
+                  </Suspense>
                 </div>
               </div>
               <div className="relative w-full aspect-[4/3] order-1 lg:order-2">
-                <ImageShimmer />
+                <Suspense fallback={<div className="absolute inset-0 bg-gray-200" />}>
+                  <ImageShimmer />
+                </Suspense>
               </div>
             </>
           )}
@@ -509,7 +545,11 @@ export default function HomePage() {
               {item.layout === "left" ? (
                 <>
                   <div className="relative w-full aspect-[4/3]">
-                    {!isImageLoaded && <ImageShimmer />}
+                    {!isImageLoaded && (
+                      <Suspense fallback={<div className="absolute inset-0 bg-gray-200" />}>
+                        <ImageShimmer />
+                      </Suspense>
+                    )}
                     <Image
                       src={imageUrl || "/placeholder.svg"}
                       alt={item.image.alternativeText || item.title}
@@ -518,8 +558,10 @@ export default function HomePage() {
                       priority={isFirstImage}
                       loading={isFirstImage ? "eager" : "lazy"}
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      quality={85}
+                      quality={isFirstImage ? 90 : 75}
                       onLoad={() => handleImageLoad(item.id)}
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                     />
                   </div>
                   <div className="flex items-center justify-center p-8 lg:p-16 order-2 bg-gray-50 w-full">
@@ -554,7 +596,11 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="relative w-full aspect-[4/3] order-1 lg:order-2">
-                    {!isImageLoaded && <ImageShimmer />}
+                    {!isImageLoaded && (
+                      <Suspense fallback={<div className="absolute inset-0 bg-gray-200" />}>
+                        <ImageShimmer />
+                      </Suspense>
+                    )}
                     <Image
                       src={imageUrl || "/placeholder.svg"}
                       alt={item.image.alternativeText || item.title}
@@ -563,8 +609,10 @@ export default function HomePage() {
                       priority={isFirstImage}
                       loading={isFirstImage ? "eager" : "lazy"}
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      quality={85}
+                      quality={isFirstImage ? 90 : 75}
                       onLoad={() => handleImageLoad(item.id)}
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                     />
                   </div>
                 </>
@@ -576,6 +624,7 @@ export default function HomePage() {
     </div>
   )
 }
+
 
 
 

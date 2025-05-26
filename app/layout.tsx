@@ -27,6 +27,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Preconnect to external domains */}
+        <link rel="preconnect" href="https://dependable-cow-a08d589b62.strapiapp.com" />
+        <link rel="dns-prefetch" href="https://dependable-cow-a08d589b62.strapiapp.com" />
+
+        {/* Resource hints */}
+        <link rel="preload" href="/fonts/your-font.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
