@@ -26,8 +26,7 @@ const nextConfig: NextConfig = {
   // Enable compression
   compress: true,
 
-  // Optimize bundle
-  swcMinify: true,
+ 
   
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
