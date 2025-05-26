@@ -397,7 +397,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     }
   }, [images.length, visibleImages, currentImageIndex])
 
-  // Memoize pagination dot click handlers
+
   const paginationHandlers = useMemo(
     () => Array.from({ length: paginationData.totalSets }, (_, i) => () => scrollToImage(i * visibleImages)),
     [paginationData.totalSets, scrollToImage, visibleImages],
@@ -426,7 +426,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
             image={image}
             index={index}
             visibleImages={visibleImages}
-            priority={index < 2} // Prioritize first 2 images for LCP optimization
+            priority={index < 2} 
           />
         ))}
       </div>
