@@ -4,7 +4,6 @@ import { useState } from "react"
 import Image from "next/image"
 import { Heart } from "lucide-react"
 
-// This is a simplified version of the product card that doesn't rely on API data
 export default function MockProductCard() {
   const [isHovered, setIsHovered] = useState(false)
 

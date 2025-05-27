@@ -1,7 +1,6 @@
 "use client"
 
-import React from "react"
-import { useState, useRef, useEffect, useMemo, useCallback } from "react"
+import React, { useState, useRef, useEffect, useCallback } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -15,6 +14,9 @@ interface ImageGalleryProps {
   images: GalleryImage[]
 }
 
+const blurDataURL =
+  "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+
 const ImageShimmer = React.memo(() => (
   <div className="absolute inset-0 bg-gray-200 overflow-hidden">
     <div
@@ -26,15 +28,18 @@ const ImageShimmer = React.memo(() => (
     />
     <style jsx>{`
       @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
+        0% {
+          background-position: -200% 0;
+        }
+        100% {
+          background-position: 200% 0;
+        }
       }
     `}</style>
   </div>
 ))
 
 ImageShimmer.displayName = "ImageShimmer"
-
 
 const GalleryImageItem = React.memo(
   ({
@@ -51,23 +56,19 @@ const GalleryImageItem = React.memo(
     const [imageLoaded, setImageLoaded] = useState(false)
     const [imageError, setImageError] = useState(false)
 
-    
-    const blurDataURL = useMemo(
-      () =>
-        "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q==",
-      [],
-    )
-
     const handleImageLoad = useCallback(() => {
       setImageLoaded(true)
     }, [])
 
-    const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-      const target = e.target as HTMLImageElement
-      target.src = "/placeholder.svg?height=600&width=450"
-      setImageError(true)
-      setImageLoaded(true)
-    }, [])
+    const handleImageError = useCallback(
+      (e: React.SyntheticEvent<HTMLImageElement>) => {
+        const target = e.target as HTMLImageElement
+        target.src = "/placeholder.png"
+        setImageError(true)
+        setImageLoaded(true)
+      },
+      [],
+    )
 
     return (
       <div className="flex-shrink-0 w-full sm:w-1/2 snap-start">
@@ -79,13 +80,11 @@ const GalleryImageItem = React.memo(
             maxHeight: "600px",
           }}
         >
-         
           {!imageLoaded && !imageError && <ImageShimmer />}
 
-          
           {(isVisible || priority) && (
             <Image
-              src={image.url || "/placeholder.svg?height=600&width=450"}
+              src={image.url || "/placeholder.png"}
               alt={image.alt}
               fill
               className={`object-cover object-center transition-opacity duration-300 ${
@@ -116,11 +115,8 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const updateVisibleImages = useCallback(() => {
-    const newVisibleImages = window.innerWidth < 640 ? 1 : 2
-    if (newVisibleImages !== visibleImages) {
-      setVisibleImages(newVisibleImages)
-    }
-  }, [visibleImages])
+    setVisibleImages(window.innerWidth < 640 ? 1 : 2)
+  }, [])
 
   useEffect(() => {
     updateVisibleImages()
@@ -139,7 +135,6 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     }
   }, [updateVisibleImages])
 
- 
   const scrollToImage = useCallback(
     (index: number) => {
       if (scrollContainerRef.current) {
@@ -158,53 +153,32 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     [visibleImages],
   )
 
- 
   const handlePrevious = useCallback(() => {
-    const newIndex = Math.max(currentImageIndex - visibleImages, 0)
-    scrollToImage(newIndex)
+    scrollToImage(Math.max(currentImageIndex - visibleImages, 0))
   }, [currentImageIndex, visibleImages, scrollToImage])
 
   const handleNext = useCallback(() => {
-    const newIndex = Math.min(currentImageIndex + visibleImages, images.length - visibleImages)
-    scrollToImage(newIndex)
+    scrollToImage(Math.min(currentImageIndex + visibleImages, images.length - visibleImages))
   }, [currentImageIndex, visibleImages, images.length, scrollToImage])
 
+  const totalSets = Math.ceil(images.length / visibleImages)
+  const activeSet = Math.floor(currentImageIndex / visibleImages)
+  const showPagination = images.length > visibleImages
 
-  const buttonVisibility = useMemo(
-    () => ({
-      showPrevButton: currentImageIndex > 0,
-      showNextButton: currentImageIndex < images.length - visibleImages,
-    }),
-    [currentImageIndex, images.length, visibleImages],
+  const paginationHandlers = Array.from({ length: totalSets }, (_, i) => () =>
+    scrollToImage(i * visibleImages),
   )
 
-  const paginationData = useMemo(() => {
-    const totalSets = Math.ceil(images.length / visibleImages)
-    const activeSet = Math.floor(currentImageIndex / visibleImages)
-
-    return {
-      totalSets,
-      activeSet,
-      showPagination: images.length > visibleImages,
-    }
-  }, [images.length, visibleImages, currentImageIndex])
-
-
-  const paginationHandlers = useMemo(
-    () => Array.from({ length: paginationData.totalSets }, (_, i) => () => scrollToImage(i * visibleImages)),
-    [paginationData.totalSets, scrollToImage, visibleImages],
-  )
-
-  
-  const getVisibleImageIndices = useMemo(() => {
+  const getVisibleImageIndices = () => {
     const start = currentImageIndex
-    const end = Math.min(start + visibleImages + 1, images.length) 
+    const end = Math.min(start + visibleImages + 1, images.length)
     return { start, end }
-  }, [currentImageIndex, visibleImages, images.length])
+  }
+
+  const { start, end } = getVisibleImageIndices()
 
   return (
     <div className="relative" style={{ minHeight: "500px", maxHeight: "700px" }}>
-      
       <div
         ref={scrollContainerRef}
         className="flex overflow-x-auto snap-x snap-mandatory"
@@ -214,24 +188,18 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
           minHeight: "500px",
         }}
       >
-        {images.map((image, index) => {
-          const { start, end } = getVisibleImageIndices
-          const isVisible = index >= start && index < end
-
-          return (
-            <GalleryImageItem
-              key={image.id}
-              image={image}
-              index={index}
-              priority={index < 2} 
-              isVisible={isVisible}
-            />
-          )
-        })}
+        {images.map((image, index) => (
+          <GalleryImageItem
+            key={image.id}
+            image={image}
+            index={index}
+            priority={index < 2}
+            isVisible={index >= start && index < end}
+          />
+        ))}
       </div>
 
-      
-      {buttonVisibility.showPrevButton && (
+      {currentImageIndex > 0 && (
         <button
           onClick={handlePrevious}
           className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md hover:bg-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
@@ -243,7 +211,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
         </button>
       )}
 
-      {buttonVisibility.showNextButton && (
+      {currentImageIndex < images.length - visibleImages && (
         <button
           onClick={handleNext}
           className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-md hover:bg-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
@@ -255,15 +223,14 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
         </button>
       )}
 
-      
-      {paginationData.showPagination && (
+      {showPagination && (
         <div className="flex justify-center mt-4 gap-2" style={{ minHeight: "20px" }}>
-          {Array.from({ length: paginationData.totalSets }).map((_, i) => (
+          {Array.from({ length: totalSets }).map((_, i) => (
             <button
               key={i}
               onClick={paginationHandlers[i]}
               className={`h-3 w-3 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 ${
-                i === paginationData.activeSet ? "bg-gray-900" : "bg-gray-400 hover:bg-gray-600"
+                i === activeSet ? "bg-gray-900" : "bg-gray-400 hover:bg-gray-600"
               }`}
               style={{ minHeight: "20px", minWidth: "20px" }}
               aria-label={`Go to image set ${i + 1}`}

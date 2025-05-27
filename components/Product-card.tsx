@@ -39,7 +39,7 @@ const ProductCard = memo(function ProductCard({ product, priority = false }: Pro
       <div className="group relative">
         <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
           <Image
-            src={getImageUrl() || "/placeholder.svg"}
+            src={getImageUrl() || "/placeholder.png"}
             alt={product.name}
             fill
             className="object-cover object-center transition-transform duration-300 group-hover:scale-105"

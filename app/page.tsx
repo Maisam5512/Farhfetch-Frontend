@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect ,} from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -209,7 +209,8 @@ export default function HomePage() {
     return <HomePageSkeleton />
   }
 
-  const sortedData = homeData.sort((a, b) => a.order - b.order)
+   const sortedData = homeData.sort((a, b) => a.order - b.order)
+  
 
   return (
     <div className="bg-white">

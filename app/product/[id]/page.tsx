@@ -56,10 +56,10 @@ export default function ProductPage() {
   const [selectedSize, setSelectedSize] = useState<string>("")
 
 
-  const apiUrl = useMemo(
-    () => `${process.env.NEXT_PUBLIC_STRAPI_API_URL}/products?filters[slug][$eq]=${productId}&populate=*`,
-    [productId],
-  )
+
+
+  const apiUrl = `${process.env.NEXT_PUBLIC_STRAPI_API_URL}/products?filters[slug][$eq]=${productId}&populate=*`
+
 
   useEffect(() => {
     const fetchProduct = async () => {
