@@ -22,12 +22,12 @@ async function ProductList() {
   let error: string | null = null
 
   try {
-    const response = await fetch("https://dependable-cow-a08d589b62.strapiapp.com/api/products?populate=*", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/products?populate=*`, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      next: { revalidate: 300 }, 
+      next: { revalidate: 300 },
     })
 
     if (!response.ok) {
@@ -59,7 +59,7 @@ async function ProductList() {
         <ProductCard
           key={product.id}
           product={product}
-          priority={index < 4} 
+          priority={index < 4}
         />
       ))}
     </div>

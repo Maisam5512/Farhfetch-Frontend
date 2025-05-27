@@ -275,3 +275,6 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
     </div>
   )
 }
+
+
+

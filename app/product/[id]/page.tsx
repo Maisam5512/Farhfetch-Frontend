@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import dynamic from "next/dynamic"
 import type { Product } from "@/types/product"
 
-// Lazy load the image gallery to reduce initial bundle size
 const ImageGallery = dynamic(() => import("@/components/Image-gallery"), {
   loading: () => (
     <div className="relative w-full" style={{ aspectRatio: "3/4", minHeight: "600px" }}>
@@ -17,16 +16,13 @@ const ImageGallery = dynamic(() => import("@/components/Image-gallery"), {
   ssr: false,
 })
 
-// Optimized loading skeleton with fixed dimensions
 const ProductSkeleton = () => (
   <div className="container mx-auto px-4 py-8">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Image Gallery Skeleton - Fixed dimensions */}
       <div className="relative w-full" style={{ aspectRatio: "3/4", minHeight: "600px" }}>
         <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
       </div>
 
-      {/* Product Details Skeleton - Fixed layout */}
       <div className="flex flex-col" style={{ minHeight: "600px" }}>
         <div className="space-y-4">
           <div className="h-8 bg-gray-200 rounded animate-pulse" />
@@ -59,15 +55,16 @@ export default function ProductPage() {
   const [isWishlisted, setIsWishlisted] = useState(false)
   const [selectedSize, setSelectedSize] = useState<string>("")
 
-  // Memoize API URL to prevent unnecessary re-renders
+
   const apiUrl = useMemo(
-    () => `https://dependable-cow-a08d589b62.strapiapp.com/api/products/${productId}?populate=*`,
+    () => `${process.env.NEXT_PUBLIC_STRAPI_API_URL}/products?filters[slug][$eq]=${productId}&populate=*`,
     [productId],
   )
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        console.log("Fetching product with slug:", productId);
         const response = await fetch(apiUrl, {
           headers: {
             Accept: "application/json",
@@ -79,16 +76,35 @@ export default function ProductPage() {
         }
 
         const data = await response.json()
-        setProduct(data.data)
+        console.log("API Response:", data);
 
-        // Set default size if available
-        if (data.data?.sizes?.length > 0) {
-          setSelectedSize(data.data.sizes[0])
+
+        if (Array.isArray(data.data) && data.data.length > 0) {
+
+          const rawProduct = data.data[0]
+
+
+          const formattedProduct = {
+            id: rawProduct.id,
+            ...rawProduct,
+            images: rawProduct.images || [],
+          }
+          setProduct(formattedProduct)
+
+
+          if (formattedProduct.sizes?.length > 0) {
+            setSelectedSize(formattedProduct.sizes[0])
+          }
+        } else {
+          console.log("No product found for slug:", productId);
+
+          setProduct(null)
         }
 
         setLoading(false)
       } catch (error) {
         console.error("Error fetching product:", error)
+        setProduct(null)
         setLoading(false)
       }
     }
@@ -98,7 +114,7 @@ export default function ProductPage() {
     }
   }, [productId, apiUrl])
 
-  // Memoize price calculations
+
   const priceInfo = useMemo(() => {
     if (!product) return null
 
@@ -118,7 +134,6 @@ export default function ProductPage() {
     }
   }, [product])
 
-  // Memoize delivery dates
   const deliveryInfo = useMemo(() => {
     if (!product) return null
 
@@ -134,7 +149,6 @@ export default function ProductPage() {
     return { estimatedDeliveryMin, estimatedDeliveryMax }
   }, [product])
 
-  // Memoize product images
   const productImages = useMemo(() => {
     if (!product?.images?.length) {
       return [
@@ -155,15 +169,11 @@ export default function ProductPage() {
     }))
   }, [product])
 
-  // Optimized event handlers
   const handleAddToBag = useCallback(() => {
     if (!product) return
 
-    // Simulate add to bag action
     console.log(`Added ${product.name} (Size: ${selectedSize}) to bag!`)
 
-    // In a real app, you would add the product to the cart state or make an API call
-    // For now, we'll just show a simple feedback
     const button = document.querySelector("[data-add-to-bag]") as HTMLButtonElement
     if (button) {
       const originalText = button.textContent
@@ -203,19 +213,15 @@ export default function ProductPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Image Gallery - Fixed dimensions to prevent layout shift */}
         <div className="relative w-full" style={{ minHeight: "600px" }}>
           <ImageGallery images={productImages} />
         </div>
 
-        {/* Product Details - Fixed layout structure to prevent shifts */}
         <div className="flex flex-col" style={{ minHeight: "600px" }}>
-          {/* Product Title and Brand - Fixed height container */}
           <div className="mb-6" style={{ minHeight: "120px" }}>
             <h1 className="text-2xl font-bold mb-1 text-gray-900">{product.brand}</h1>
             <p className="text-lg text-gray-800 mb-4">{product.name}</p>
 
-            {/* Price Section - Fixed height to prevent layout shift */}
             <div className="mb-2" style={{ minHeight: "60px" }}>
               {priceInfo?.discountedPrice ? (
                 <div className="space-y-2">
@@ -233,7 +239,6 @@ export default function ProductPage() {
             </div>
           </div>
 
-          {/* Sizes Section - Fixed height container */}
           <div className="mb-6" style={{ minHeight: "100px" }}>
             <p className="font-medium mb-2 text-gray-900">
               {product.sizes && product.sizes.length === 1 && product.sizes[0] === "One Size"
@@ -247,9 +252,8 @@ export default function ProductPage() {
                   <button
                     key={index}
                     onClick={() => handleSizeSelect(size)}
-                    className={`border px-4 py-3 text-sm hover:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors duration-200 ${
-                      selectedSize === size ? "border-gray-900 bg-gray-900 text-white" : "border-gray-400 text-gray-900"
-                    }`}
+                    className={`border px-4 py-3 text-sm hover:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 transition-colors duration-200 ${selectedSize === size ? "border-gray-900 bg-gray-900 text-white" : "border-gray-400 text-gray-900"
+                      }`}
                     style={{ minHeight: "44px", minWidth: "44px" }}
                     aria-label={`Select size ${size}`}
                     type="button"
@@ -261,7 +265,6 @@ export default function ProductPage() {
             )}
           </div>
 
-          {/* Action Buttons - Fixed height */}
           <div className="flex items-center gap-4 mb-6" style={{ minHeight: "50px" }}>
             <Button
               className="flex-1 cursor-pointer bg-gray-900 hover:bg-gray-800 text-white transition-colors duration-200"
@@ -287,7 +290,6 @@ export default function ProductPage() {
             </Button>
           </div>
 
-          {/* Delivery Info - Fixed height */}
           <div className="mb-6" style={{ minHeight: "60px" }}>
             <p className="font-bold mb-1 text-gray-900">Estimated delivery</p>
             {deliveryInfo && (
@@ -297,7 +299,6 @@ export default function ProductPage() {
             )}
           </div>
 
-          {/* Colors Section - Fixed height container */}
           {product.avaliableColors && product.avaliableColors.length > 0 && (
             <div className="mt-6" style={{ minHeight: "80px" }}>
               <h2 className="font-bold mb-2 text-gray-900">Available Colors</h2>

@@ -145,7 +145,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://dependable-cow-a08d589b62.strapiapp.com/api/Home-sections?populate=*", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/Home-sections?populate=*`, {
           headers: {
             Accept: "application/json",
           },
@@ -174,14 +174,14 @@ export default function HomePage() {
             height: item.image.height,
             formats: item.image.formats
               ? {
-                  small: item.image.formats.small
-                    ? {
-                        url: item.image.formats.small.url,
-                        width: item.image.formats.small.width,
-                        height: item.image.formats.small.height,
-                      }
-                    : undefined,
-                }
+                small: item.image.formats.small
+                  ? {
+                    url: item.image.formats.small.url,
+                    width: item.image.formats.small.width,
+                    height: item.image.formats.small.height,
+                  }
+                  : undefined,
+              }
               : undefined,
           },
         }))
@@ -289,7 +289,7 @@ export default function HomePage() {
           </section>
         )
       })}
-       
+
       {/* Information Cards Section */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

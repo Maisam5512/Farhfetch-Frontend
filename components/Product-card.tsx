@@ -10,15 +10,14 @@ interface ProductCardProps {
   priority?: boolean
 }
 
-// Optimized ProductCard component with memo
+
 const ProductCard = memo(function ProductCard({ product, priority = false }: ProductCardProps) {
-  // Simplified image data processing
   const getImageUrl = () => {
     const imageObj = product.images?.[0]
     if (!imageObj) return "/placeholder.png"
 
     const rawUrl = imageObj.formats?.medium?.url || imageObj.url
-    return rawUrl.startsWith("http") ? rawUrl : `https://dependable-cow-a08d589b62.media.strapiapp.com${rawUrl}`
+    return rawUrl.startsWith("http") ? rawUrl : `${process.env.NEXT_PUBLIC_STRAPI_MEDIA_URL}${rawUrl}`
   }
 
   
@@ -36,7 +35,7 @@ const ProductCard = memo(function ProductCard({ product, priority = false }: Pro
   const sizesString = product.sizes?.join(", ") || ""
 
   return (
-    <Link href={`/product/${product.documentId}`} className="block">
+    <Link href={`/product/${product.slug}`} className="block">
       <div className="group relative">
         <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
           <Image
